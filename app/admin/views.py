@@ -1,23 +1,27 @@
 from flask import render_template, redirect, url_for
+from app.admin.forms import LoginForm
 
 from . import admin
 
 
+@admin.route('/')
+def index():
+    return render_template('admin/index.html')
+
+
 # 登录
-@admin.route('/login/')
+@admin.route('/login/', methods=['GET', 'POST'])
 def login():
-    return render_template('admin/login.html')
+    form = LoginForm()
+    if form.validate_on_submit():
+        data = form.data
+    return render_template('admin/login.html', form=form)
 
 
 # 退出
 @admin.route('/logout/')
 def logout():
     return redirect(url_for('admin.login'))
-
-
-@admin.route('/')
-def index():
-    return render_template('admin/index.html')
 
 
 @admin.route('/pwd/')
