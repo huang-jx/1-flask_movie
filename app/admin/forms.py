@@ -10,13 +10,13 @@ class LoginForm(FlaskForm):
     account = StringField(
         label='账号',
         validators=[
-            DataRequired('请输入账号!')
+            DataRequired('请输入密码！'),
         ],
         description='账号',
         render_kw={
             'class': 'form-control',
             'placeholder': '请输入账号！',
-            'required': 'required'
+            # 'required': 'required'
         }
     )
     pwd = PasswordField(
@@ -28,7 +28,7 @@ class LoginForm(FlaskForm):
         render_kw={
             'class': 'form-control',
             'placeholder': '请输入密码！',
-            'required': 'required'
+            # 'required': 'required'
         }
     )
     submit = SubmitField(
@@ -42,4 +42,4 @@ class LoginForm(FlaskForm):
         account = field.data
         admin = Admin.query.filter_by(name=account).count()
         if admin == 0:
-            raise ValidationError()
+            raise ValidationError('账号不存在！')

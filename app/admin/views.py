@@ -1,10 +1,32 @@
-from flask import render_template, redirect, url_for
+from contextlib import contextmanager
+
+from flask import render_template, redirect, url_for, flash, session, request, appcontext_pushed
+
 from app.admin.forms import LoginForm
-
+from app.models import Admin
 from . import admin
+from functools import wraps
+
+"""
+使用session做一个访问控制:
+使用装饰器简化视图函数代码
+flask采用线程隔离的思想,每次创建线程都使用上下文技术为该线程创建一个对应的全局的http对象,
+随着线程的结束,该对象的生命周期也会结束,存放的栈会被释放
+def admin_login_req(func):
+    with app.test_request_context():
+        @wraps(func)
+        def decorated_function():
+            if 'admin' not in session:
+                return redirect(url_for('admin.login'))
+            else:
+                func()
+
+        return decorated_function()
+"""
 
 
-@admin.route('/')
+@admin.route('/', methods=['GET', 'POST'])
+# @admin_login_req
 def index():
     return render_template('admin/index.html')
 
@@ -15,12 +37,19 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         data = form.data
+        admin = Admin.query.filter_by(name=data['account']).first()
+        if not admin.check_pwd(data['pwd']):
+            flash('密码错误!')
+            return redirect(url_for('admin.login'))
+        session['admin'] = data['account']
+        return redirect(request.args.get('next') or url_for('admin.index'))
     return render_template('admin/login.html', form=form)
 
 
 # 退出
 @admin.route('/logout/')
 def logout():
+    session.pop('admin', None)
     return redirect(url_for('admin.login'))
 
 
