@@ -2,8 +2,9 @@ from contextlib import contextmanager
 
 from flask import render_template, redirect, url_for, flash, session, request, appcontext_pushed
 
-from app.admin.forms import LoginForm
-from app.models import Admin
+from app import db
+from app.admin.forms import LoginForm, TagForm
+from app.models import Admin, Tag
 from . import admin
 from functools import wraps
 
@@ -25,10 +26,13 @@ def admin_login_req(func):
 """
 
 
-@admin.route('/', methods=['GET', 'POST'])
+@admin.route('/')
 # @admin_login_req
 def index():
-    return render_template('admin/index.html')
+    if 'admin' not in session:
+        return redirect(url_for('admin.login', next=request.url))
+    else:
+        return render_template('admin/index.html')
 
 
 # 登录
@@ -39,7 +43,7 @@ def login():
         data = form.data
         admin = Admin.query.filter_by(name=data['account']).first()
         if not admin.check_pwd(data['pwd']):
-            flash('密码错误!')
+            flash('密码错误!', 'err')
             return redirect(url_for('admin.login'))
         session['admin'] = data['account']
         return redirect(request.args.get('next') or url_for('admin.index'))
@@ -58,10 +62,28 @@ def pwd():
     return render_template('admin/pwd.html')
 
 
-# 编辑标签
-@admin.route('/tag/add/')
+# 添加标签
+@admin.route('/tag/add/', methods=['GET', 'POST'])
 def tag_add():
-    return render_template('admin/tag_add.html')
+    if 'admin' not in session:
+        return redirect(url_for('admin.login', next=request.url))
+    else:
+        form = TagForm()
+        if form.validate_on_submit():
+            data = form.data
+            name = data['name']
+            tag = Tag.query.filter_by(name=name).count()
+            if tag >= 1:
+                flash('名称已经存在!', 'err')
+                return redirect(url_for('admin.tag_add'))
+            tag = Tag(
+                name=data['name']
+            )
+            db.session.add(tag)
+            db.session.commit()
+            flash('添加标签成功!', 'ok')
+            return redirect(url_for('admin.tag_add'))
+        return render_template('admin/tag_add.html', form=form)
 
 
 # 标签列表
