@@ -1,4 +1,5 @@
 {% extends 'admin/admin.html' %}
+{% import 'ui/admin_page.html' as pg %}
 
 {% block content %}
     <section class="content-header">
@@ -35,11 +36,11 @@
                                 <th>添加时间</th>
                                 <th>操作事项</th>
                             </tr>
-                            {% for v in range(0,10) %}
+                            {% for item in page_data.items %}
                             <tr>
-                                <td>1</td>
-                                <td>科幻</td>
-                                <td>2017-06-01</td>
+                                <td>{{ item.id }}</td>
+                                <td>{{ item.name }}</td>
+                                <td>{{ item.add_time }}</td>
                                 <td>
                                     <a class="label label-success">编辑</a>
                                     &nbsp;
@@ -51,15 +52,7 @@
                         </table>
                     </div>
                     <div class="box-footer clearfix">
-                        <ul class="pagination pagination-sm no-margin pull-right">
-                            <li><a href="#">首页</a></li>
-                            <li><a href="#">上一页</a></li>
-                            <li><a href="#">1</a></li>
-                            <li><a href="#">2</a></li>
-                            <li><a href="#">3</a></li>
-                            <li><a href="#">下一页</a></li>
-                            <li><a href="#">尾页</a></li>
-                        </ul>
+                        {{ pg.render_pagination(page_data, 'admin.tag_list') }}
                     </div>
                 </div>
             </div>

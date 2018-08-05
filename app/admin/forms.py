@@ -54,6 +54,9 @@ class TagForm(FlaskForm):
         label='标签名称',
 
         description='标签',
+        validators=[
+            DataRequired()
+        ],
         render_kw={
             'class': 'form-control',
             'id': 'input_name',

@@ -36,8 +36,8 @@
                             <div class="form-group">
                                 <label for="input_name">{{ form.name.label }}</label>
                                 {{ form.name }}
-                                {% for err in form.name.errors %}
-                                    <font style="color: red;">{{ err }}</font>
+                                {% for error in form.name.errors %}
+                                    <font style="color: red;">{{ error }}</font>
                                 {% endfor %}
                             </div>
                         </div>

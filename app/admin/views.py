@@ -1,3 +1,4 @@
+import math
 from contextlib import contextmanager
 
 from flask import render_template, redirect, url_for, flash, session, request, appcontext_pushed
@@ -87,9 +88,23 @@ def tag_add():
 
 
 # 标签列表
-@admin.route('/tag/list/')
-def tag_list():
-    return render_template('admin/tag_list.html')
+@admin.route('/tag/list/<int:page>/<int:per_page>/', methods=['GET'])
+def tag_list(page=None, per_page=None):
+    if 'admin' not in session:
+        return redirect(url_for('admin.login', next=request.url))
+    else:
+        if (page or per_page) is None:
+            page = 1
+            per_page = 5
+        page_data = Tag.query.order_by(
+            Tag.add_time.asc()
+        ).paginate(page=page, per_page=per_page, error_out=True)
+        # 测试
+        # list = []
+        # pages = page_data.iter_pages()
+        # for page in pages:
+        #     list.append(page)
+        return render_template('admin/tag_list.html', page_data=page_data)
 
 
 # 编辑电影
